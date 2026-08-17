@@ -90,6 +90,7 @@ function AppContent() {
   const [ingameType, setIngameType] = useState<string>('All');
   const [sortBy, setSortBy] = useState<SortOption>('default');
   const [inStockOnly, setInStockOnly] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   useEffect(() => {
     supabase.from('products').select('*').eq('active', true).then(({ data }) => {
@@ -503,51 +504,6 @@ function AppContent() {
             transition={{ duration: 0.35 }}
             className="container mx-auto px-3 sm:px-4 pt-3 sm:pt-4 pb-6"
           >
-            {/* ── Mobile filters (chips + sort) ── */}
-            {(activeCategory === 'LIMITEDS' || activeCategory === 'INGAME CURRENCIES') && (
-              <div className="sm:hidden mt-3 space-y-2">
-                {/* Game row (INGAME only) */}
-                {activeCategory === 'INGAME CURRENCIES' && (
-                  <div className="flex gap-1.5 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none' }}>
-                    {ingameGameNames.map(sub => (
-                      <button key={sub} onClick={() => { setIngameSubcat(sub); setIngameType('All'); }}
-                        className={`flex-none flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold border transition-all ${ingameSubcat === sub ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40' : 'bg-white/[0.03] text-white/40 border-white/[0.07]'}`}
-                      >
-                        {sub !== 'All' && ingameGameIconMap[sub] && (
-                          <img src={ingameGameIconMap[sub]} className="w-3.5 h-3.5 rounded object-cover flex-none" alt="" />
-                        )}
-                        {sub}
-                      </button>
-                    ))}
-                  </div>
-                )}
-                {/* Type row */}
-                <div className="flex gap-1.5 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none' }}>
-                  {(activeCategory === 'LIMITEDS' ? dynamicLimitedSubcats : INGAME_TYPES).map(sub => {
-                    const active = activeCategory === 'LIMITEDS' ? limitedSubcat === sub : ingameType === sub;
-                    return (
-                      <button key={sub} onClick={() => activeCategory === 'LIMITEDS' ? setLimitedSubcat(sub) : setIngameType(sub)}
-                        className={`flex-none px-3 py-1.5 rounded-xl text-[11px] font-semibold border transition-all ${active ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40' : 'bg-white/[0.03] text-white/40 border-white/[0.07]'}`}
-                      >{sub}</button>
-                    );
-                  })}
-                </div>
-                {/* Sort + stock row */}
-                <div className="flex gap-2">
-                  <select value={sortBy} onChange={e => setSortBy(e.target.value as SortOption)}
-                    className="flex-1 bg-zinc-900/70 border border-white/[0.07] rounded-xl px-3 py-2 text-white/50 text-[11px] outline-none appearance-none"
-                  >
-                    <option value="default">Featured</option>
-                    <option value="price-asc">Price: Low → High</option>
-                    <option value="price-desc">Price: High → Low</option>
-                    <option value="name-asc">Name A → Z</option>
-                  </select>
-                  <button onClick={() => setInStockOnly(v => !v)}
-                    className={`flex-none px-3 py-2 rounded-xl text-[11px] font-semibold border transition-all ${inStockOnly ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40' : 'bg-white/[0.03] text-white/40 border-white/[0.07]'}`}
-                  >In Stock</button>
-                </div>
-              </div>
-            )}
 
             {/* Layout: sidebar + content */}
             <div className="flex gap-4 mt-4">
@@ -695,31 +651,59 @@ function AppContent() {
               {/* Main content area */}
               <div className="flex-1 min-w-0">
                 {/* Search bar (non-ROBUX) */}
-                {activeCategory !== 'ROBUX' && (
-                  <div className="relative mb-4">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25 pointer-events-none" />
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={e => setSearchQuery(e.target.value)}
-                      placeholder={
-                        activeCategory === 'INGAME CURRENCIES'
-                          ? ingameSubcat !== 'All' ? `Search in ${ingameSubcat}…` : 'Search in-game currencies…'
-                          : `Search ${activeCategory.toLowerCase()}…`
-                      }
-                      className="w-full bg-zinc-900/60 border border-white/[0.07] hover:border-white/12 focus:border-yellow-500/40 rounded-2xl pl-11 pr-10 py-3.5 text-white/90 text-sm placeholder-white/25 outline-none transition-all"
-                      style={{ backdropFilter: 'blur(8px)' }}
-                    />
-                    {searchQuery && (
+                {activeCategory !== 'ROBUX' && (() => {
+                  const mobileFilterCount = [
+                    ingameSubcat !== 'All',
+                    ingameType !== 'All',
+                    limitedSubcat !== 'All',
+                    sortBy !== 'default',
+                    inStockOnly,
+                  ].filter(Boolean).length;
+                  return (
+                    <div className="flex gap-2 mb-4">
+                      <div className="relative flex-1">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25 pointer-events-none" />
+                        <input
+                          type="text"
+                          value={searchQuery}
+                          onChange={e => setSearchQuery(e.target.value)}
+                          placeholder={
+                            activeCategory === 'INGAME CURRENCIES'
+                              ? ingameSubcat !== 'All' ? `Search in ${ingameSubcat}…` : 'Search in-game currencies…'
+                              : `Search ${activeCategory.toLowerCase()}…`
+                          }
+                          className="w-full bg-zinc-900/60 border border-white/[0.07] hover:border-white/12 focus:border-yellow-500/40 rounded-2xl pl-11 pr-10 py-3.5 text-white/90 text-sm placeholder-white/25 outline-none transition-all"
+                          style={{ backdropFilter: 'blur(8px)' }}
+                        />
+                        {searchQuery && (
+                          <button
+                            onClick={() => setSearchQuery('')}
+                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors p-0.5"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                      {/* Mobile filter button — 3-line icon, hidden on desktop */}
                       <button
-                        onClick={() => setSearchQuery('')}
-                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors p-0.5"
+                        className={`sm:hidden relative flex-none flex items-center justify-center w-[52px] h-[52px] rounded-2xl border transition-all ${
+                          mobileFilterCount > 0
+                            ? 'bg-yellow-500/15 border-yellow-500/40 text-yellow-400'
+                            : 'bg-zinc-900/60 border-white/[0.07] text-white/40'
+                        }`}
+                        onClick={() => setShowMobileFilters(true)}
+                        aria-label="Filters"
                       >
-                        <X className="w-4 h-4" />
+                        <SlidersHorizontal className="w-4 h-4" />
+                        {mobileFilterCount > 0 && (
+                          <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-yellow-500 text-black text-[9px] font-black rounded-full flex items-center justify-center">
+                            {mobileFilterCount}
+                          </span>
+                        )}
                       </button>
-                    )}
-                  </div>
-                )}
+                    </div>
+                  );
+                })()}
 
                 <AnimatePresence mode="wait">
                   <motion.div
@@ -742,6 +726,144 @@ function AppContent() {
                 </AnimatePresence>
               </div>
             </div>
+            {/* ── Mobile filter bottom sheet ── */}
+            <AnimatePresence>
+              {showMobileFilters && (
+                <>
+                  {/* Backdrop */}
+                  <motion.div
+                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                    className="fixed inset-0 bg-black/60 z-[55] sm:hidden"
+                    onClick={() => setShowMobileFilters(false)}
+                  />
+                  {/* Sheet */}
+                  <motion.div
+                    initial={{ y: '100%' }}
+                    animate={{ y: 0 }}
+                    exit={{ y: '100%' }}
+                    transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+                    className="fixed bottom-0 left-0 right-0 bg-zinc-950 border-t border-white/[0.08] rounded-t-3xl z-[56] sm:hidden overflow-y-auto max-h-[85vh]"
+                    style={{ backdropFilter: 'blur(20px)' }}
+                  >
+                    {/* Handle bar */}
+                    <div className="flex justify-center pt-3 pb-1">
+                      <div className="w-10 h-1 bg-white/20 rounded-full" />
+                    </div>
+
+                    <div className="px-5 pb-8 pt-2 space-y-5">
+                      {/* Header */}
+                      <div className="flex items-center justify-between">
+                        <p className="text-white font-bold text-base">Filters</p>
+                        <button
+                          onClick={() => { setIngameSubcat('All'); setIngameType('All'); setLimitedSubcat('All'); setSortBy('default'); setInStockOnly(false); }}
+                          className="text-yellow-400/70 hover:text-yellow-400 text-xs font-semibold transition-colors"
+                        >
+                          Reset all
+                        </button>
+                      </div>
+
+                      {/* Games — INGAME only */}
+                      {activeCategory === 'INGAME CURRENCIES' && (
+                        <div>
+                          <p className="text-white/35 text-[10px] font-semibold uppercase tracking-widest mb-2.5">Game</p>
+                          <div className="flex flex-wrap gap-2">
+                            {ingameGameNames.map(sub => (
+                              <button key={sub}
+                                onClick={() => { setIngameSubcat(sub); setIngameType('All'); }}
+                                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                                  ingameSubcat === sub
+                                    ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40'
+                                    : 'bg-white/[0.04] text-white/45 border-white/[0.07]'
+                                }`}
+                              >
+                                {sub !== 'All' && ingameGameIconMap[sub] && (
+                                  <img src={ingameGameIconMap[sub]} className="w-4 h-4 rounded object-cover flex-none" alt="" />
+                                )}
+                                {sub}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Item Type — INGAME or LIMITED */}
+                      {(activeCategory === 'INGAME CURRENCIES' || activeCategory === 'LIMITEDS') && (
+                        <div>
+                          <p className="text-white/35 text-[10px] font-semibold uppercase tracking-widest mb-2.5">
+                            {activeCategory === 'LIMITEDS' ? 'Item Type' : 'Type'}
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {(activeCategory === 'LIMITEDS' ? dynamicLimitedSubcats : INGAME_TYPES).map(sub => {
+                              const active = activeCategory === 'LIMITEDS' ? limitedSubcat === sub : ingameType === sub;
+                              return (
+                                <button key={sub}
+                                  onClick={() => activeCategory === 'LIMITEDS' ? setLimitedSubcat(sub) : setIngameType(sub)}
+                                  className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                                    active
+                                      ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40'
+                                      : 'bg-white/[0.04] text-white/45 border-white/[0.07]'
+                                  }`}
+                                >{sub}</button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Sort */}
+                      <div>
+                        <p className="text-white/35 text-[10px] font-semibold uppercase tracking-widest mb-2.5">Sort By</p>
+                        <div className="grid grid-cols-2 gap-2">
+                          {([
+                            { val: 'default', label: 'Featured' },
+                            { val: 'price-asc', label: 'Price: Low → High' },
+                            { val: 'price-desc', label: 'Price: High → Low' },
+                            { val: 'name-asc', label: 'Name A → Z' },
+                          ] as { val: SortOption; label: string }[]).map(({ val, label }) => (
+                            <button key={val} onClick={() => setSortBy(val)}
+                              className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold border transition-all ${
+                                sortBy === val
+                                  ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40'
+                                  : 'bg-white/[0.04] text-white/45 border-white/[0.07]'
+                              }`}
+                            >
+                              <span className={`w-3.5 h-3.5 rounded-full border flex-none flex items-center justify-center ${sortBy === val ? 'border-yellow-400 bg-yellow-400/20' : 'border-white/20'}`}>
+                                {sortBy === val && <Check className="w-2 h-2 text-yellow-400" />}
+                              </span>
+                              {label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* In Stock */}
+                      <button
+                        onClick={() => setInStockOnly(v => !v)}
+                        className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl border transition-all ${
+                          inStockOnly
+                            ? 'bg-yellow-500/15 border-yellow-500/35 text-yellow-400'
+                            : 'bg-white/[0.04] border-white/[0.07] text-white/50'
+                        }`}
+                      >
+                        <span className="text-sm font-semibold">In Stock Only</span>
+                        <span className={`w-5 h-5 rounded border flex-none flex items-center justify-center transition-all ${inStockOnly ? 'bg-yellow-500/25 border-yellow-500/60' : 'border-white/20'}`}>
+                          {inStockOnly && <Check className="w-3 h-3 text-yellow-400" />}
+                        </span>
+                      </button>
+
+                      {/* Done button */}
+                      <motion.button
+                        whileTap={{ scale: 0.97 }}
+                        onClick={() => setShowMobileFilters(false)}
+                        className="w-full bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-bold py-4 rounded-2xl text-sm shadow-lg shadow-yellow-500/20"
+                      >
+                        Show Results
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
           </motion.main>
         )}
       </AnimatePresence>
