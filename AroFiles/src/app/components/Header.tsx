@@ -65,52 +65,53 @@ export function Header({
   };
 
   return (
-    /* Outer sticky wrapper — pointer-events-none so the transparent gradient doesn't block clicks */
     <div className="sticky top-0 z-50 px-2 sm:px-4 pt-2.5 sm:pt-3 pb-1.5 sm:pb-2 pointer-events-none"
-      style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.88) 0%, transparent 100%)' }}
+      style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.92) 0%, transparent 100%)' }}
     >
       <header className="max-w-7xl mx-auto pointer-events-auto">
-        {/*
-          Pill container — NO overflow-hidden so dropdown isn't clipped.
-          Instead, rounded-2xl just sets the visual shape; children manage
-          their own overflow where needed (mobile tab row uses overflow-x-auto).
-        */}
         <div
-          className="bg-zinc-950/95 border border-white/[0.07] rounded-2xl shadow-2xl shadow-black/60"
-          style={{ backdropFilter: 'blur(20px)' }}
+          className="bg-zinc-950/95 border border-white/[0.07] rounded-2xl shadow-2xl shadow-black/70"
+          style={{ backdropFilter: 'blur(24px)' }}
         >
 
-          {/* ── Row 1: Logo · [Desktop nav center] · Controls ── */}
-          <div className="px-3 sm:px-5 py-2.5 sm:py-3 flex items-center gap-2 sm:gap-3 min-w-0">
+          {/* ── Row 1: Logo · Nav · Controls ── */}
+          <div className="px-3 sm:px-5 py-2.5 sm:py-3 flex items-center gap-2 sm:gap-4 min-w-0">
 
             {/* Logo */}
             <button
               onClick={handleLogoClick}
-              className="flex items-center gap-1.5 sm:gap-2.5 hover:opacity-80 transition-opacity flex-shrink-0 focus:outline-none"
+              className="flex items-center gap-2 sm:gap-2.5 hover:opacity-85 transition-opacity flex-shrink-0 focus:outline-none group"
             >
-              <img src={logoImg} alt="AroStall"
-                className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl object-cover shadow-md shadow-yellow-500/30 flex-none"
-              />
-              <span className="font-bold text-sm sm:text-lg tracking-wide bg-gradient-to-r from-yellow-200 via-yellow-400 to-amber-500 bg-clip-text text-transparent"
-                style={{ fontFamily: "'Cinzel', serif" }}
-              >AroStall</span>
+              <div className="relative flex-none">
+                <img src={logoImg} alt="AroStall"
+                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl object-cover shadow-lg shadow-yellow-500/25"
+                />
+                <div className="absolute inset-0 rounded-xl ring-1 ring-yellow-500/20 group-hover:ring-yellow-500/40 transition-all" />
+              </div>
+              {/* "Aro" golden · "Stall" white */}
+              <span
+                className="font-black tracking-tight text-sm sm:text-[17px] leading-none select-none"
+                style={{ fontFamily: "'Cinzel', serif", letterSpacing: '-0.01em' }}
+              >
+                <span className="bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-500 bg-clip-text text-transparent">Aro</span><span className="text-white/90">Stall</span>
+              </span>
             </button>
 
-            {/* ── Desktop category tabs (hidden on mobile) ── */}
+            {/* ── Desktop nav tabs ── */}
             <div className="hidden sm:flex flex-1 items-center justify-center gap-0.5">
               {showCategoryBar && NAV_CATS.map(({ id, label, icon: Icon }) => {
                 const isActive = activeCategory === id;
                 return (
                   <button key={id} onClick={() => onCategoryChange?.(id)}
                     className={`relative flex items-center gap-1.5 px-3 md:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap ${
-                      isActive ? 'text-yellow-400' : 'text-white/40 hover:text-white/70 hover:bg-white/[0.04]'
+                      isActive ? 'text-yellow-400' : 'text-white/35 hover:text-white/65 hover:bg-white/[0.04]'
                     }`}
                   >
                     <Icon className="w-3.5 h-3.5 flex-none" />
                     {label}
                     {isActive && (
                       <motion.div layoutId="cat-pill"
-                        className="absolute inset-0 rounded-xl bg-yellow-500/10 border border-yellow-500/25"
+                        className="absolute inset-0 rounded-xl bg-yellow-500/10 border border-yellow-500/20"
                         style={{ zIndex: -1 }}
                         transition={{ type: 'spring', stiffness: 400, damping: 32 }}
                       />
@@ -125,39 +126,51 @@ export function Header({
             <div className="flex-1 sm:hidden" />
 
             {/* ── Right controls ── */}
-            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
 
               {/* Currency dropdown */}
               <div ref={currencyRef} className="relative">
-                <motion.button whileTap={{ scale: 0.95 }}
+                <motion.button
+                  whileTap={{ scale: 0.94 }}
                   onClick={() => setCurrencyOpen(o => !o)}
-                  className="flex items-center gap-1 bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] hover:border-yellow-500/30 text-white/70 hover:text-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold transition-all"
+                  className={`flex items-center gap-1 sm:gap-1.5 h-8 sm:h-9 px-2 sm:px-3 rounded-xl border text-xs font-bold transition-all ${
+                    currencyOpen
+                      ? 'bg-yellow-500/15 border-yellow-500/40 text-yellow-300'
+                      : 'bg-white/[0.04] border-white/[0.08] text-white/55 hover:bg-white/[0.07] hover:border-white/[0.14] hover:text-white/80'
+                  }`}
                 >
-                  <span className="text-yellow-400 font-bold">{selected.sign}</span>
-                  <span className="hidden sm:inline text-white/60">{selected.value}</span>
-                  <ChevronDown className={`w-3 h-3 text-white/30 transition-transform duration-200 ${currencyOpen ? 'rotate-180' : ''}`} />
+                  <span className={`font-black text-sm ${currencyOpen ? 'text-yellow-300' : 'text-yellow-400/80'}`}>
+                    {selected.sign}
+                  </span>
+                  <span className="hidden sm:inline tracking-wide">{selected.value}</span>
+                  <ChevronDown className={`w-3 h-3 opacity-50 transition-transform duration-200 ${currencyOpen ? 'rotate-180' : ''}`} />
                 </motion.button>
 
-                {/* Dropdown — rendered via portal-like fixed position to avoid clipping */}
                 <AnimatePresence>
                   {currencyOpen && (
                     <motion.div
-                      initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                      initial={{ opacity: 0, y: -6, scale: 0.96 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -8, scale: 0.95 }}
-                      transition={{ duration: 0.15, type: 'spring', stiffness: 400, damping: 30 }}
-                      className="absolute top-[calc(100%+8px)] right-0 bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl shadow-black/80 z-[200] min-w-[180px] overflow-hidden"
+                      exit={{ opacity: 0, y: -6, scale: 0.96 }}
+                      transition={{ duration: 0.14, type: 'spring', stiffness: 420, damping: 30 }}
+                      className="absolute top-[calc(100%+6px)] right-0 bg-zinc-950 border border-white/[0.09] rounded-2xl shadow-2xl shadow-black/80 z-[200] min-w-[190px] overflow-hidden"
                     >
                       {currencies.map(c => (
                         <button key={c.value}
                           onClick={() => { setCurrency(c.value); setCurrencyOpen(false); }}
-                          className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors ${
-                            currency === c.value ? 'bg-yellow-500/10 text-yellow-400' : 'text-white/60 hover:bg-white/[0.06] hover:text-white'
+                          className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-all ${
+                            currency === c.value
+                              ? 'bg-yellow-500/10 text-yellow-300'
+                              : 'text-white/50 hover:bg-white/[0.05] hover:text-white'
                           }`}
                         >
-                          <span className="text-base font-bold w-5 text-center">{c.sign}</span>
-                          <span className="flex-1 text-left">{c.name}</span>
-                          {currency === c.value && <span className="text-yellow-400 text-xs">✓</span>}
+                          <span className={`text-base font-black w-5 text-center ${currency === c.value ? 'text-yellow-400' : 'text-white/40'}`}>{c.sign}</span>
+                          <span className="flex-1 text-left text-xs font-medium">{c.name}</span>
+                          {currency === c.value && (
+                            <span className="w-4 h-4 rounded-full bg-yellow-500/20 border border-yellow-500/40 flex items-center justify-center">
+                              <span className="w-1.5 h-1.5 rounded-full bg-yellow-400" />
+                            </span>
+                          )}
                         </button>
                       ))}
                     </motion.div>
@@ -166,49 +179,64 @@ export function Header({
               </div>
 
               {/* Language toggle */}
-              <div className="flex items-center bg-white/[0.05] border border-white/[0.08] rounded-xl overflow-hidden text-[10px] sm:text-xs font-bold">
-                <motion.button whileTap={{ scale: 0.95 }}
+              <div className="flex items-center h-8 sm:h-9 bg-white/[0.04] border border-white/[0.08] rounded-xl overflow-hidden">
+                <motion.button whileTap={{ scale: 0.92 }}
                   onClick={() => setLang('en')}
-                  className={`px-2 sm:px-2.5 py-1.5 sm:py-2 transition-colors ${lang === 'en' ? 'bg-yellow-500 text-black' : 'text-white/40 hover:text-white'}`}
+                  className={`h-full px-2 sm:px-2.5 text-[10px] sm:text-[11px] font-black tracking-wider transition-all ${
+                    lang === 'en'
+                      ? 'bg-gradient-to-b from-yellow-400 to-amber-500 text-black shadow-inner'
+                      : 'text-white/30 hover:text-white/55'
+                  }`}
                 >EN</motion.button>
-                <div className="w-px h-3.5 bg-white/10" />
-                <motion.button whileTap={{ scale: 0.95 }}
+                <div className="w-px h-4 bg-white/[0.08]" />
+                <motion.button whileTap={{ scale: 0.92 }}
                   onClick={() => setLang('bn')}
-                  className={`px-2 sm:px-2.5 py-1.5 sm:py-2 transition-colors ${lang === 'bn' ? 'bg-yellow-500 text-black' : 'text-white/40 hover:text-white'}`}
+                  className={`h-full px-2 sm:px-2.5 text-[10px] sm:text-[11px] font-black transition-all ${
+                    lang === 'bn'
+                      ? 'bg-gradient-to-b from-yellow-400 to-amber-500 text-black shadow-inner'
+                      : 'text-white/30 hover:text-white/55'
+                  }`}
                 >বাং</motion.button>
               </div>
 
-              {/* Auth */}
+              {/* Auth button */}
               {user ? (
-                <button onClick={onDashboardClick}
-                  className="bg-white/[0.05] hover:bg-white/[0.08] text-yellow-400 border border-yellow-500/20 hover:border-yellow-500/40 p-1.5 sm:px-3 sm:py-2 rounded-xl flex items-center gap-2 transition-all text-sm font-semibold"
+                <motion.button whileTap={{ scale: 0.94 }} onClick={onDashboardClick}
+                  className="flex items-center gap-1.5 h-8 sm:h-9 px-2 sm:px-3 rounded-xl border border-yellow-500/20 bg-yellow-500/[0.06] hover:bg-yellow-500/[0.12] hover:border-yellow-500/35 text-yellow-400 transition-all text-xs font-semibold"
                 >
-                  <User className="w-4 h-4 flex-none" />
-                  <span className="hidden md:inline truncate max-w-[80px]">{user.name}</span>
-                </button>
+                  <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-yellow-500/20 border border-yellow-500/30 flex items-center justify-center flex-none">
+                    <User className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                  </div>
+                  <span className="hidden md:inline truncate max-w-[72px] text-yellow-300/90 font-semibold">{user.name}</span>
+                </motion.button>
               ) : (
-                <button onClick={onLoginClick}
-                  className="bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-black font-bold p-1.5 sm:px-4 sm:py-2 rounded-xl flex items-center gap-1.5 transition-all shadow-md shadow-yellow-500/20 text-xs"
+                <motion.button whileTap={{ scale: 0.94 }} onClick={onLoginClick}
+                  className="flex items-center gap-1.5 h-8 sm:h-9 px-2.5 sm:px-4 rounded-xl bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-black font-bold text-[11px] sm:text-xs shadow-md shadow-yellow-500/25 hover:shadow-yellow-500/40 transition-all"
                 >
-                  <LogIn className="w-4 h-4 flex-none" />
-                  <span className="hidden sm:inline">{t.login}</span>
-                </button>
+                  <LogIn className="w-3.5 h-3.5 flex-none" />
+                  <span className="hidden sm:inline tracking-wide">{t.login}</span>
+                </motion.button>
               )}
 
-              {/* Cart */}
-              <button onClick={onCartClick}
-                className={`relative bg-white/[0.05] hover:bg-white/[0.08] text-white border p-1.5 sm:px-3 sm:py-2 rounded-xl flex items-center gap-1.5 transition-all text-xs font-semibold ${
-                  cartCount > 0 ? 'border-yellow-500/30 shadow-sm shadow-yellow-500/10' : 'border-white/[0.08] hover:border-yellow-500/30'
+              {/* Cart button */}
+              <motion.button whileTap={{ scale: 0.94 }} onClick={onCartClick}
+                className={`relative flex items-center gap-1.5 h-8 sm:h-9 px-2.5 sm:px-3.5 rounded-xl border text-xs font-semibold transition-all ${
+                  cartCount > 0
+                    ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-300 hover:bg-yellow-500/15 shadow-sm shadow-yellow-500/10'
+                    : 'bg-white/[0.04] border-white/[0.08] text-white/45 hover:bg-white/[0.07] hover:border-white/[0.14] hover:text-white/70'
                 }`}
               >
-                <ShoppingCart className="w-4 h-4 flex-none" />
-                <span className="hidden sm:inline">{t.cart}</span>
+                <ShoppingCart className={`w-3.5 h-3.5 flex-none transition-colors ${cartCount > 0 ? 'text-yellow-400' : ''}`} />
+                <span className="hidden sm:inline tracking-wide">{t.cart}</span>
                 {cartCount > 0 && (
-                  <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }}
-                    className="absolute -top-1.5 -right-1.5 bg-yellow-500 text-black text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center"
+                  <motion.span
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] bg-gradient-to-br from-yellow-400 to-amber-500 text-black text-[9px] font-black rounded-full flex items-center justify-center px-1 shadow-md shadow-yellow-500/40"
                   >{cartCount}</motion.span>
                 )}
-              </button>
+              </motion.button>
+
             </div>
           </div>
 
@@ -220,15 +248,15 @@ export function Header({
                   const isActive = activeCategory === id;
                   return (
                     <button key={id} onClick={() => onCategoryChange?.(id)}
-                      className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-[10px] font-semibold transition-colors ${
-                        isActive ? 'text-yellow-400' : 'text-white/30'
+                      className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-[10px] font-bold transition-colors ${
+                        isActive ? 'text-yellow-400' : 'text-white/25 hover:text-white/50'
                       }`}
                     >
                       <Icon className="w-3.5 h-3.5 flex-none" />
                       <span>{shortLabel}</span>
                       {isActive && (
                         <motion.div layoutId="mobile-cat-line"
-                          className="absolute bottom-0 left-3 right-3 h-0.5 bg-yellow-400 rounded-full"
+                          className="absolute bottom-0 left-4 right-4 h-[2px] bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full"
                           transition={{ type: 'spring', stiffness: 400, damping: 32 }}
                         />
                       )}

@@ -3,7 +3,7 @@ import {
   X, CheckCircle, Clock, RefreshCw, Package, Truck, Lock, Plus, Trash2, Edit2,
   BarChart2, Search, Eye, EyeOff, Upload, MessageSquare, Send, ChevronLeft,
   Settings, Save, ToggleLeft, ToggleRight, Megaphone, Wallet, Link, Percent,
-  LayoutGrid, Star, Gamepad2, Minus, Image as ImageIcon,
+  LayoutGrid, Star, Gamepad2, Minus, Image as ImageIcon, Sparkles,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { supabase } from '../../lib/supabase';
@@ -104,6 +104,23 @@ export function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const [categoriesSaved, setCategoriesSaved] = useState(false);
   const gameIconFileRef = useRef<HTMLInputElement>(null);
 
+  // Card floating images
+  const FLOAT_CATS = [
+    { id: 'ROBUX', label: 'Robux Card', color: 'yellow' },
+    { id: 'LIMITEDS', label: 'Limiteds Card', color: 'purple' },
+    { id: 'INGAME CURRENCIES', label: 'In-Game Card', color: 'blue' },
+    { id: 'ACCOUNTS', label: 'Accounts Card', color: 'emerald' },
+  ] as const;
+  const [cardFloatsState, setCardFloatsState] = useState<Record<string, string[]>>({
+    ROBUX: ['','','',''],
+    LIMITEDS: ['','','',''],
+    'INGAME CURRENCIES': ['','','',''],
+    ACCOUNTS: ['','','',''],
+  });
+  const [floatTarget, setFloatTarget] = useState<{ catId: string; slot: number } | null>(null);
+  const [uploadingFloat, setUploadingFloat] = useState<string | null>(null);
+  const floatFileRef = useRef<HTMLInputElement>(null);
+
   // Reviews
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
@@ -144,6 +161,21 @@ export function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       setLimitedSubcats([...DEFAULT_LIMITED_SUBCATS]);
     }
   }, [settings.limited_subcats_json]);
+
+  useEffect(() => {
+    try {
+      const parsed = JSON.parse(settings.card_floats_json || '{}');
+      if (typeof parsed === 'object' && parsed !== null) {
+        setCardFloatsState(prev => ({
+          ...prev,
+          ROBUX: (parsed.ROBUX || ['','','','']).concat(['','','','']).slice(0, 4),
+          LIMITEDS: (parsed.LIMITEDS || ['','','','']).concat(['','','','']).slice(0, 4),
+          'INGAME CURRENCIES': (parsed['INGAME CURRENCIES'] || ['','','','']).concat(['','','','']).slice(0, 4),
+          ACCOUNTS: (parsed.ACCOUNTS || ['','','','']).concat(['','','','']).slice(0, 4),
+        }));
+      }
+    } catch { /* keep defaults */ }
+  }, [settings.card_floats_json]);
 
   useEffect(() => {
     if (isOpen && authed) {
@@ -287,6 +319,26 @@ export function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   };
 
   // ── Categories ──
+  const uploadFloatImage = async (catId: string, slot: number, file: File) => {
+    if (!ALLOWED_TYPES.includes(file.type)) { alert('Only JPG, PNG, WebP and GIF allowed.'); return; }
+    if (file.size > MAX_FILE_SIZE) { alert('File too large (max 5MB).'); return; }
+    const key = `${catId}-${slot}`;
+    setUploadingFloat(key);
+    try {
+      const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
+      const safeName = `float-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { data, error } = await supabase.storage.from('product-images').upload(safeName, file, { cacheControl: '3600', upsert: false });
+      if (error) { alert('Upload failed: ' + error.message); return; }
+      const { data: { publicUrl } } = supabase.storage.from('product-images').getPublicUrl(data.path);
+      setCardFloatsState(prev => {
+        const slots = [...(prev[catId] || ['','','',''])];
+        slots[slot] = publicUrl;
+        return { ...prev, [catId]: slots };
+      });
+    } catch { alert('Upload failed.'); }
+    finally { setUploadingFloat(null); }
+  };
+
   const uploadGameIcon = async (gameName: string, file: File) => {
     if (!ALLOWED_TYPES.includes(file.type)) { alert('Only JPG, PNG, WebP and GIF allowed.'); return; }
     if (file.size > MAX_FILE_SIZE) { alert('File too large (max 5MB).'); return; }
@@ -326,6 +378,7 @@ export function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       const pairs = [
         { key: 'ingame_games_json', value: JSON.stringify(ingameGames), updated_at: new Date().toISOString() },
         { key: 'limited_subcats_json', value: JSON.stringify(limitedSubcats), updated_at: new Date().toISOString() },
+        { key: 'card_floats_json', value: JSON.stringify(cardFloatsState), updated_at: new Date().toISOString() },
       ];
       const { error } = await supabase.from('site_settings').upsert(pairs, { onConflict: 'key' });
       if (error) { alert('Error: ' + error.message); return; }
@@ -934,6 +987,19 @@ export function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                         setIconTarget(null);
                       }}
                     />
+                    {/* Hidden file input for card float images */}
+                    <input
+                      ref={floatFileRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      className="hidden"
+                      onChange={e => {
+                        const file = e.target.files?.[0];
+                        if (file && floatTarget) uploadFloatImage(floatTarget.catId, floatTarget.slot, file);
+                        e.target.value = '';
+                        setFloatTarget(null);
+                      }}
+                    />
 
                     {/* INGAME Games */}
                     <div className="bg-white/[0.03] border border-white/[0.07] rounded-2xl p-4 space-y-3">
@@ -1048,6 +1114,76 @@ export function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                         ))}
                       </div>
                       <p className="text-white/25 text-xs">Assign these to individual products in the Products tab via the "Item Type" dropdown.</p>
+                    </div>
+
+                    {/* ── Hero Card Floating Images ── */}
+                    <div className="bg-white/[0.03] border border-white/[0.07] rounded-2xl p-4 space-y-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-lg bg-pink-500/15 flex items-center justify-center flex-none">
+                          <Sparkles className="w-3.5 h-3.5 text-pink-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white/80 font-semibold text-sm">Hero Card Floating Images</p>
+                          <p className="text-white/25 text-[11px]">Up to 4 floating images per browse category card</p>
+                        </div>
+                      </div>
+
+                      {FLOAT_CATS.map(fc => {
+                        const slots = cardFloatsState[fc.id] || ['','','',''];
+                        const colorMap: Record<string, string> = {
+                          yellow: 'border-yellow-500/25 bg-yellow-500/5',
+                          purple: 'border-purple-500/25 bg-purple-500/5',
+                          blue: 'border-blue-500/25 bg-blue-500/5',
+                          emerald: 'border-emerald-500/25 bg-emerald-500/5',
+                        };
+                        const badgeMap: Record<string, string> = {
+                          yellow: 'text-yellow-400 bg-yellow-500/10',
+                          purple: 'text-purple-400 bg-purple-500/10',
+                          blue: 'text-blue-400 bg-blue-500/10',
+                          emerald: 'text-emerald-400 bg-emerald-500/10',
+                        };
+                        return (
+                          <div key={fc.id} className={`rounded-xl border p-3 space-y-2 ${colorMap[fc.color]}`}>
+                            <p className={`text-xs font-bold px-2 py-0.5 rounded-full w-fit ${badgeMap[fc.color]}`}>{fc.label}</p>
+                            <div className="grid grid-cols-4 gap-2">
+                              {slots.map((url, si) => {
+                                const floatKey = `${fc.id}-${si}`;
+                                const isUploading = uploadingFloat === floatKey;
+                                return (
+                                  <div key={si} className="relative group/slot flex flex-col items-center gap-1">
+                                    <button
+                                      onClick={() => { setFloatTarget({ catId: fc.id, slot: si }); floatFileRef.current?.click(); }}
+                                      disabled={isUploading}
+                                      className="w-full aspect-square rounded-xl border border-dashed border-white/[0.12] hover:border-white/30 bg-white/[0.03] hover:bg-white/[0.06] flex items-center justify-center overflow-hidden transition-all relative"
+                                    >
+                                      {url ? (
+                                        <img src={url} alt="" className="w-full h-full object-cover rounded-xl" />
+                                      ) : isUploading ? (
+                                        <RefreshCw className="w-4 h-4 text-white/30 animate-spin" />
+                                      ) : (
+                                        <Upload className="w-3.5 h-3.5 text-white/20 group-hover/slot:text-white/45 transition-colors" />
+                                      )}
+                                    </button>
+                                    {url && (
+                                      <button
+                                        onClick={() => setCardFloatsState(prev => {
+                                          const s = [...(prev[fc.id] || ['','','',''])];
+                                          s[si] = '';
+                                          return { ...prev, [fc.id]: s };
+                                        })}
+                                        className="text-[9px] text-white/20 hover:text-red-400 transition-colors"
+                                      >
+                                        <X className="w-3 h-3" />
+                                      </button>
+                                    )}
+                                    <span className="text-[9px] text-white/20">#{si + 1}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
 
                     {/* Save */}

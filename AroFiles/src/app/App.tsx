@@ -206,6 +206,13 @@ function AppContent() {
     } catch { return ['All', 'Hats', 'Faces', 'Hair', 'Neck', 'Shoulder', 'Back']; }
   }, [settings.limited_subcats_json]);
 
+  const cardFloats = useMemo(() => {
+    try {
+      const parsed = JSON.parse(settings.card_floats_json || '{}');
+      return typeof parsed === 'object' && parsed !== null ? parsed as Record<string, string[]> : {};
+    } catch { return {} as Record<string, string[]>; }
+  }, [settings.card_floats_json]);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-zinc-950 to-black" style={{ fontFamily: "'Poppins', sans-serif" }}>
@@ -284,7 +291,7 @@ function AppContent() {
                   className="font-black leading-none tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white via-yellow-100 to-yellow-500"
                   style={{ fontFamily: "'Cinzel', serif", fontSize: 'clamp(2.8rem, 12vw, 9rem)', lineHeight: 0.9 }}
                 >
-                  ROBLOX
+                  ARO
                 </h1>
                 <h2
                   className="font-black leading-none tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-600"
@@ -371,6 +378,16 @@ function AppContent() {
 
             {/* ── Category bento grid ── */}
             <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-10 sm:pb-16">
+              <style>{`
+                @keyframes bento-float-a { 0%,100%{transform:translateY(0) rotate(0deg);opacity:.35} 50%{transform:translateY(-14px) rotate(10deg);opacity:.7} }
+                @keyframes bento-float-b { 0%,100%{transform:translateY(0) rotate(0deg);opacity:.2} 50%{transform:translateY(-10px) rotate(-8deg);opacity:.5} }
+                @keyframes bento-float-c { 0%,100%{transform:translateY(0) rotate(0deg);opacity:.15} 50%{transform:translateY(-18px) rotate(14deg);opacity:.4} }
+                @keyframes bento-pulse-ring { 0%{transform:scale(1);opacity:.5} 100%{transform:scale(2.6);opacity:0} }
+                @keyframes bento-shimmer { 0%{transform:translateX(-120%) skewX(-18deg)} 100%{transform:translateX(320%) skewX(-18deg)} }
+                @keyframes bento-spin-slow { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+                @keyframes bento-counter { 0%,100%{opacity:.18;transform:translateY(0)} 50%{opacity:.5;transform:translateY(-4px)} }
+              `}</style>
+
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -388,12 +405,17 @@ function AppContent() {
                     desc: 'Top-up instantly',
                     icon: Coins,
                     gradient: 'from-yellow-500/20 to-amber-600/10',
-                    border: 'border-yellow-500/25 hover:border-yellow-400/50',
-                    glow: 'hover:shadow-yellow-500/10',
+                    border: 'border-yellow-500/25 hover:border-yellow-400/55',
+                    glow: 'hover:shadow-yellow-500/15',
                     iconBg: 'bg-yellow-500/15',
                     iconColor: 'text-yellow-400',
+                    ringColor: 'rgba(234,179,8,0.25)',
+                    glowHex: '#eab308',
                     tag: 'Instant',
                     tagColor: 'bg-yellow-500/15 text-yellow-400',
+                    orb1: 'bg-yellow-400/10',
+                    orb2: 'bg-amber-500/8',
+                    orb3: 'bg-yellow-300/6',
                   },
                   {
                     id: 'LIMITEDS' as Category,
@@ -401,12 +423,17 @@ function AppContent() {
                     desc: 'Rare collectibles',
                     icon: Gem,
                     gradient: 'from-purple-500/15 to-indigo-600/10',
-                    border: 'border-purple-500/20 hover:border-purple-400/40',
-                    glow: 'hover:shadow-purple-500/10',
+                    border: 'border-purple-500/20 hover:border-purple-400/45',
+                    glow: 'hover:shadow-purple-500/15',
                     iconBg: 'bg-purple-500/15',
                     iconColor: 'text-purple-400',
+                    ringColor: 'rgba(168,85,247,0.25)',
+                    glowHex: '#a855f7',
                     tag: 'Exclusive',
                     tagColor: 'bg-purple-500/15 text-purple-400',
+                    orb1: 'bg-purple-400/10',
+                    orb2: 'bg-indigo-500/8',
+                    orb3: 'bg-purple-300/6',
                   },
                   {
                     id: 'INGAME CURRENCIES' as Category,
@@ -414,12 +441,17 @@ function AppContent() {
                     desc: 'Coins, items & passes',
                     icon: Gamepad2,
                     gradient: 'from-blue-500/15 to-cyan-600/10',
-                    border: 'border-blue-500/20 hover:border-blue-400/40',
-                    glow: 'hover:shadow-blue-500/10',
+                    border: 'border-blue-500/20 hover:border-blue-400/45',
+                    glow: 'hover:shadow-blue-500/15',
                     iconBg: 'bg-blue-500/15',
                     iconColor: 'text-blue-400',
+                    ringColor: 'rgba(59,130,246,0.25)',
+                    glowHex: '#3b82f6',
                     tag: 'All Games',
                     tagColor: 'bg-blue-500/15 text-blue-400',
+                    orb1: 'bg-blue-400/10',
+                    orb2: 'bg-cyan-500/8',
+                    orb3: 'bg-blue-300/6',
                   },
                   {
                     id: 'ACCOUNTS' as Category,
@@ -427,45 +459,120 @@ function AppContent() {
                     desc: 'Ready-to-play',
                     icon: Users,
                     gradient: 'from-emerald-500/15 to-green-600/10',
-                    border: 'border-emerald-500/20 hover:border-emerald-400/40',
-                    glow: 'hover:shadow-emerald-500/10',
+                    border: 'border-emerald-500/20 hover:border-emerald-400/45',
+                    glow: 'hover:shadow-emerald-500/15',
                     iconBg: 'bg-emerald-500/15',
                     iconColor: 'text-emerald-400',
+                    ringColor: 'rgba(16,185,129,0.25)',
+                    glowHex: '#10b981',
                     tag: 'Verified',
                     tagColor: 'bg-emerald-500/15 text-emerald-400',
+                    orb1: 'bg-emerald-400/10',
+                    orb2: 'bg-green-500/8',
+                    orb3: 'bg-emerald-300/6',
                   },
                 ] as const).map((cat, i) => {
                   const CatIcon = cat.icon;
                   return (
                   <motion.button
                     key={cat.id}
-                    initial={{ opacity: 0, y: 24 }}
+                    initial={{ opacity: 0, y: 28 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.75 + i * 0.08, duration: 0.5, type: 'spring', stiffness: 120 }}
-                    whileHover={{ y: -4, scale: 1.02 }}
-                    whileTap={{ scale: 0.97 }}
+                    transition={{ delay: 0.75 + i * 0.09, duration: 0.55, type: 'spring', stiffness: 110 }}
+                    whileHover={{ y: -5, scale: 1.025 }}
+                    whileTap={{ scale: 0.965 }}
                     onClick={() => { setShowShop(true); handleCategoryChange(cat.id); }}
                     className={`group relative bg-gradient-to-br ${cat.gradient} border ${cat.border} rounded-2xl p-4 sm:p-6 text-left flex flex-col gap-3 sm:gap-4 overflow-hidden shadow-xl ${cat.glow} hover:shadow-2xl transition-all duration-300`}
+                    style={{ minHeight: '160px' }}
                   >
-                    {/* Corner accent */}
-                    <div className={`absolute -top-6 -right-6 w-20 h-20 ${cat.iconBg} rounded-full blur-2xl opacity-60 group-hover:opacity-100 transition-opacity`} />
+                    {/* ── Floating background orbs ── */}
+                    <div className={`absolute -top-8 -right-8 w-28 h-28 ${cat.orb1} rounded-full blur-3xl group-hover:scale-125 transition-transform duration-700`} />
+                    <div className={`absolute -bottom-6 -left-6 w-20 h-20 ${cat.orb2} rounded-full blur-2xl group-hover:scale-110 transition-transform duration-700 delay-75`} />
+                    <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 ${cat.orb3} rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
 
-                    <div className="flex items-start justify-between">
-                      <div className={`w-9 h-9 sm:w-12 sm:h-12 ${cat.iconBg} rounded-xl sm:rounded-2xl flex items-center justify-center flex-none`}>
-                        <CatIcon className={`w-4 h-4 sm:w-6 sm:h-6 ${cat.iconColor}`} />
-                      </div>
-                      <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${cat.tagColor}`}>
-                        {cat.tag}
-                      </span>
+                    {/* ── Shimmer sweep on hover ── */}
+                    <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
+                      <div
+                        className="absolute top-0 bottom-0 w-[40%] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                        style={{
+                          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.055), transparent)',
+                          animation: 'bento-shimmer 1.6s ease-in-out infinite',
+                        }}
+                      />
                     </div>
 
-                    <div>
-                      <p className="text-white font-bold text-sm sm:text-lg leading-tight">{cat.label}</p>
+                    {/* ── Subtle dot grid ── */}
+                    <div className="absolute inset-0 pointer-events-none opacity-[0.03] group-hover:opacity-[0.06] transition-opacity duration-500" style={{
+                      backgroundImage: `radial-gradient(circle, ${cat.glowHex} 1px, transparent 1px)`,
+                      backgroundSize: '20px 20px',
+                    }} />
+
+                    {/* ── Floating images (set via admin panel) ── */}
+                    {(cardFloats[cat.id] || []).map((url, pi) => url ? (
+                      <img
+                        key={pi}
+                        src={url}
+                        alt=""
+                        className="absolute pointer-events-none select-none rounded-xl object-cover shadow-lg"
+                        style={{
+                          width: '28px',
+                          height: '28px',
+                          top: `${[14, 52, 70, 33][pi % 4]}%`,
+                          right: `${[10, 5, 22, 30][pi % 4]}%`,
+                          animation: `${['bento-float-a','bento-float-b','bento-float-c','bento-float-a'][pi % 4]} ${[3.2, 4.1, 3.7, 5.0][pi % 4]}s ease-in-out infinite`,
+                          animationDelay: `${pi * 0.75}s`,
+                          filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.5))',
+                        }}
+                      />
+                    ) : null)}
+
+                    {/* ── Pulse rings behind icon ── */}
+                    <div className="relative">
+                      <div className="flex items-start justify-between">
+                        <div className="relative flex-none">
+                          {/* Ring 1 */}
+                          <div
+                            className="absolute inset-0 rounded-xl sm:rounded-2xl"
+                            style={{
+                              boxShadow: `0 0 0 2px ${cat.ringColor}`,
+                              animation: 'bento-pulse-ring 2.4s ease-out infinite',
+                            }}
+                          />
+                          {/* Ring 2 */}
+                          <div
+                            className="absolute inset-0 rounded-xl sm:rounded-2xl"
+                            style={{
+                              boxShadow: `0 0 0 2px ${cat.ringColor}`,
+                              animation: 'bento-pulse-ring 2.4s ease-out infinite',
+                              animationDelay: '1.2s',
+                            }}
+                          />
+                          {/* Icon box */}
+                          <div className={`w-9 h-9 sm:w-12 sm:h-12 ${cat.iconBg} rounded-xl sm:rounded-2xl flex items-center justify-center`}
+                            style={{ boxShadow: `0 0 20px ${cat.ringColor}` }}>
+                            <CatIcon className={`w-4 h-4 sm:w-6 sm:h-6 ${cat.iconColor} group-hover:scale-110 transition-transform duration-300`} />
+                          </div>
+                        </div>
+
+                        <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${cat.tagColor} border border-current/20`}>
+                          {cat.tag}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="relative">
+                      <p className="text-white font-bold text-sm sm:text-lg leading-tight tracking-tight">{cat.label}</p>
                       <p className="text-white/40 text-xs mt-0.5">{cat.desc}</p>
                     </div>
 
-                    <div className={`flex items-center gap-1 text-xs font-semibold ${cat.iconColor} group-hover:gap-2 transition-all`}>
-                      Shop now <ArrowRight className="w-3 h-3" />
+                    <div className={`relative flex items-center gap-1 text-xs font-bold ${cat.iconColor} group-hover:gap-2.5 transition-all duration-200`}>
+                      <span>Shop now</span>
+                      <motion.span
+                        animate={{ x: [0, 3, 0] }}
+                        transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
+                      >
+                        <ArrowRight className="w-3 h-3" />
+                      </motion.span>
                     </div>
                   </motion.button>
                   );

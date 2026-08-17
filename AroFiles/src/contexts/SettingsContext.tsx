@@ -19,6 +19,7 @@ export interface SiteSettings {
   wallet_eth: string;
   ingame_games_json: string;
   limited_subcats_json: string;
+  card_floats_json: string;
 }
 
 export const SETTING_DEFAULTS: SiteSettings = {
@@ -47,6 +48,7 @@ export const SETTING_DEFAULTS: SiteSettings = {
     { name: 'Grow A Garden', icon: '' },
   ]),
   limited_subcats_json: JSON.stringify(['Hats', 'Faces', 'Hair', 'Neck', 'Shoulder', 'Back']),
+  card_floats_json: JSON.stringify({ ROBUX: ['','','',''], LIMITEDS: ['','','',''], 'INGAME CURRENCIES': ['','','',''], ACCOUNTS: ['','','',''] }),
 };
 
 interface SettingsContextType {
