@@ -66,59 +66,56 @@ export function Header({ cartCount, onCartClick, onLoginClick, onDashboardClick,
   return (
     <div className="sticky top-0 z-50 px-3 sm:px-5 pt-3 pb-2 bg-gradient-to-b from-black/90 to-transparent backdrop-blur-none pointer-events-none">
       <header className="max-w-7xl mx-auto pointer-events-auto">
-        <div className="bg-zinc-950/95 border border-white/[0.07] rounded-2xl shadow-2xl shadow-black/60" style={{ backdropFilter: 'blur(20px)' }}>
-        <div className="px-4 sm:px-5 py-3 flex items-center gap-3">
+        <div className="bg-zinc-950/95 border border-white/[0.07] rounded-2xl shadow-2xl shadow-black/60 overflow-hidden" style={{ backdropFilter: 'blur(20px)' }}>
 
-          {/* Logo */}
-          <button
-            onClick={handleLogoClick}
-            className="flex items-center gap-2.5 hover:opacity-80 transition-opacity flex-shrink-0 focus:outline-none"
-          >
-            <img
-              src={logoImg}
-              alt="AroStall"
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl object-cover shadow-md shadow-yellow-500/30 flex-none"
-            />
-            <span
-              className="font-bold text-lg sm:text-xl tracking-wide bg-gradient-to-r from-yellow-200 via-yellow-400 to-amber-500 bg-clip-text text-transparent hidden sm:block"
-              style={{ fontFamily: "'Cinzel', serif" }}
+          {/* ── Row 1: Logo + Controls ── */}
+          <div className="px-3 sm:px-5 py-2.5 sm:py-3 flex items-center gap-2 sm:gap-3">
+
+            {/* Logo */}
+            <button
+              onClick={handleLogoClick}
+              className="flex items-center gap-2 sm:gap-2.5 hover:opacity-80 transition-opacity flex-shrink-0 focus:outline-none"
             >
-              AroStall
-            </span>
-          </button>
+              <img
+                src={logoImg}
+                alt="AroStall"
+                className="w-7 h-7 sm:w-9 sm:h-9 rounded-xl object-cover shadow-md shadow-yellow-500/30 flex-none"
+              />
+              <span
+                className="font-bold text-base sm:text-xl tracking-wide bg-gradient-to-r from-yellow-200 via-yellow-400 to-amber-500 bg-clip-text text-transparent"
+                style={{ fontFamily: "'Cinzel', serif" }}
+              >
+                AroStall
+              </span>
+            </button>
 
-          {/* Category tabs — center fill */}
-          <div className="flex-1 flex items-center justify-center gap-0.5 sm:gap-1">
-            {showCategoryBar ? NAV_CATS.map(({ id, label, icon: Icon }) => {
-              const isActive = activeCategory === id;
-              return (
-                <button
-                  key={id}
-                  onClick={() => onCategoryChange?.(id)}
-                  className={`relative flex items-center gap-1.5 px-2.5 sm:px-4 py-2 rounded-xl text-[11px] sm:text-sm font-semibold transition-all whitespace-nowrap ${
-                    isActive
-                      ? 'bg-yellow-500/15 text-yellow-400'
-                      : 'text-white/35 hover:text-white/65 hover:bg-white/[0.04]'
-                  }`}
-                >
-                  <Icon className="w-3.5 h-3.5 flex-none" />
-                  <span className="hidden sm:inline">{label}</span>
-                  <span className="sm:hidden">{label.split(' ')[0]}</span>
-                  {isActive && (
-                    <motion.div
-                      layoutId="cat-pill"
-                      className="absolute inset-0 rounded-xl bg-yellow-500/10 border border-yellow-500/25"
-                      style={{ zIndex: -1 }}
-                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                    />
-                  )}
-                </button>
-              );
-            }) : null}
-          </div>
+            {/* Category tabs — CENTER — desktop only */}
+            <div className="hidden sm:flex flex-1 items-center justify-center gap-0.5 sm:gap-1">
+              {showCategoryBar ? NAV_CATS.map(({ id, label, icon: Icon }) => {
+                const isActive = activeCategory === id;
+                return (
+                  <button
+                    key={id}
+                    onClick={() => onCategoryChange?.(id)}
+                    className={`relative flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap ${
+                      isActive ? 'bg-yellow-500/15 text-yellow-400' : 'text-white/35 hover:text-white/65 hover:bg-white/[0.04]'
+                    }`}
+                  >
+                    <Icon className="w-3.5 h-3.5 flex-none" />
+                    {label}
+                    {isActive && (
+                      <motion.div layoutId="cat-pill" className="absolute inset-0 rounded-xl bg-yellow-500/10 border border-yellow-500/25" style={{ zIndex: -1 }} transition={{ type: 'spring', stiffness: 380, damping: 30 }} />
+                    )}
+                  </button>
+                );
+              }) : null}
+            </div>
+
+            {/* Spacer on mobile so controls go right */}
+            {showCategoryBar && <div className="flex-1 sm:hidden" />}
 
           {/* Right side controls */}
-          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
 
             {/* Currency dropdown */}
             <div ref={currencyRef} className="relative">
@@ -219,7 +216,31 @@ export function Header({ cartCount, onCartClick, onLoginClick, onDashboardClick,
               )}
             </button>
           </div>
-        </div>
+          </div>
+
+          {/* ── Row 2: Category tabs — MOBILE ONLY ── */}
+          {showCategoryBar && (
+            <div className="sm:hidden border-t border-white/[0.05] overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+              <div className="flex">
+                {NAV_CATS.map(({ id, label, icon: Icon }) => {
+                  const isActive = activeCategory === id;
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => onCategoryChange?.(id)}
+                      className={`relative flex-1 flex flex-col items-center gap-1 px-2 py-2.5 text-[10px] font-semibold transition-all whitespace-nowrap ${
+                        isActive ? 'text-yellow-400' : 'text-white/35'
+                      }`}
+                    >
+                      <Icon className="w-4 h-4 flex-none" />
+                      {label.split(' ')[0]}
+                      {isActive && <motion.div layoutId="cat-mobile-pill" className="absolute bottom-0 left-2 right-2 h-0.5 bg-yellow-400 rounded-full" transition={{ type: 'spring', stiffness: 380, damping: 30 }} />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
         </div>
       </header>

@@ -31,7 +31,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
       }} />
 
       {/* Image */}
-      <div className="relative h-44 overflow-hidden bg-zinc-900">
+      <div className="relative h-32 sm:h-44 overflow-hidden bg-zinc-900">
         <img
           src={product.image}
           alt={product.name}
@@ -68,17 +68,17 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
       </div>
 
       {/* Content */}
-      <div className="p-4">
-        <h3 className="text-white/90 font-semibold text-sm leading-snug mb-1 line-clamp-2 group-hover:text-white transition-colors">
+      <div className="p-3 sm:p-4">
+        <h3 className="text-white/90 font-semibold text-xs sm:text-sm leading-snug mb-0.5 sm:mb-1 line-clamp-2 group-hover:text-white transition-colors">
           {product.name}
         </h3>
-        <p className="text-white/30 text-xs mb-4 line-clamp-1">{product.description}</p>
+        <p className="text-white/30 text-[10px] sm:text-xs mb-3 sm:mb-4 line-clamp-1">{product.description}</p>
 
-        <div className="flex items-center justify-between gap-2">
-          <div>
-            <span className="text-yellow-400 font-bold text-lg leading-none">{displayPrice}</span>
+        <div className="flex items-center justify-between gap-1 sm:gap-2">
+          <div className="min-w-0">
+            <span className="text-yellow-400 font-bold text-sm sm:text-lg leading-none">{displayPrice}</span>
             {currency === 'BDT' && product.priceUsd && (
-              <span className="text-white/25 text-[11px] ml-1.5">${product.priceUsd}</span>
+              <span className="text-white/25 text-[10px] sm:text-[11px] ml-1 hidden sm:inline">${product.priceUsd}</span>
             )}
           </div>
 
@@ -87,14 +87,15 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
             whileTap={isOutOfStock ? {} : { scale: 0.94 }}
             onClick={() => !isOutOfStock && onAddToCart(product)}
             disabled={isOutOfStock}
-            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-200 flex-none ${
+            className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-[10px] sm:text-xs font-bold transition-all duration-200 flex-none ${
               isOutOfStock
                 ? 'bg-white/[0.04] text-white/20 cursor-not-allowed'
                 : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/25 hover:bg-yellow-500 hover:text-black hover:border-yellow-500 hover:shadow-md hover:shadow-yellow-500/20'
             }`}
           >
-            <ShoppingCart className="w-3.5 h-3.5" />
-            {isOutOfStock ? 'Sold Out' : 'Add'}
+            <ShoppingCart className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+            <span className="hidden sm:inline">{isOutOfStock ? 'Sold Out' : 'Add'}</span>
+            <span className="sm:hidden">{isOutOfStock ? 'Out' : 'Add'}</span>
           </motion.button>
         </div>
       </div>

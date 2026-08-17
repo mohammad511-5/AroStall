@@ -229,7 +229,7 @@ function AppContent() {
             </div>
 
             {/* ── Hero headline block ── */}
-            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-16 sm:pt-24 pb-10 text-center">
+            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-8 sm:pt-20 pb-4 sm:pb-10 text-center">
 
               {/* Verified pill */}
               <motion.div
@@ -254,13 +254,13 @@ function AppContent() {
                 </p>
                 <h1
                   className="font-black leading-none tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white via-yellow-100 to-yellow-500"
-                  style={{ fontFamily: "'Cinzel', serif", fontSize: 'clamp(3.5rem, 13vw, 9rem)', lineHeight: 0.9 }}
+                  style={{ fontFamily: "'Cinzel', serif", fontSize: 'clamp(2.8rem, 12vw, 9rem)', lineHeight: 0.9 }}
                 >
                   ROBLOX
                 </h1>
                 <h2
                   className="font-black leading-none tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-600"
-                  style={{ fontFamily: "'Cinzel', serif", fontSize: 'clamp(2rem, 7vw, 4.5rem)', lineHeight: 1.1, marginTop: '0.15em' }}
+                  style={{ fontFamily: "'Cinzel', serif", fontSize: 'clamp(1.4rem, 5.5vw, 4.5rem)', lineHeight: 1.1, marginTop: '0.15em' }}
                 >
                   MARKETPLACE
                 </h2>
@@ -415,14 +415,14 @@ function AppContent() {
                     whileHover={{ y: -4, scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
                     onClick={() => { setShowShop(true); handleCategoryChange(cat.id); }}
-                    className={`group relative bg-gradient-to-br ${cat.gradient} border ${cat.border} rounded-2xl p-5 sm:p-6 text-left flex flex-col gap-4 overflow-hidden shadow-xl ${cat.glow} hover:shadow-2xl transition-all duration-300`}
+                    className={`group relative bg-gradient-to-br ${cat.gradient} border ${cat.border} rounded-2xl p-4 sm:p-6 text-left flex flex-col gap-3 sm:gap-4 overflow-hidden shadow-xl ${cat.glow} hover:shadow-2xl transition-all duration-300`}
                   >
                     {/* Corner accent */}
                     <div className={`absolute -top-6 -right-6 w-20 h-20 ${cat.iconBg} rounded-full blur-2xl opacity-60 group-hover:opacity-100 transition-opacity`} />
 
                     <div className="flex items-start justify-between">
-                      <div className={`w-10 h-10 sm:w-12 sm:h-12 ${cat.iconBg} rounded-2xl flex items-center justify-center flex-none`}>
-                        <cat.icon className={`w-5 h-5 sm:w-6 sm:h-6 ${cat.iconColor}`} />
+                      <div className={`w-9 h-9 sm:w-12 sm:h-12 ${cat.iconBg} rounded-xl sm:rounded-2xl flex items-center justify-center flex-none`}>
+                        <cat.icon className={`w-4 h-4 sm:w-6 sm:h-6 ${cat.iconColor}`} />
                       </div>
                       <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${cat.tagColor}`}>
                         {cat.tag}
@@ -430,7 +430,7 @@ function AppContent() {
                     </div>
 
                     <div>
-                      <p className="text-white font-bold text-base sm:text-lg leading-tight">{cat.label}</p>
+                      <p className="text-white font-bold text-sm sm:text-lg leading-tight">{cat.label}</p>
                       <p className="text-white/40 text-xs mt-0.5">{cat.desc}</p>
                     </div>
 
@@ -471,12 +471,53 @@ function AppContent() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.35 }}
-            className="container mx-auto px-4 pt-4 pb-6"
+            className="container mx-auto px-3 sm:px-4 pt-3 sm:pt-4 pb-6"
           >
+            {/* ── Mobile filters (chips + sort) ── */}
+            {(activeCategory === 'LIMITEDS' || activeCategory === 'INGAME CURRENCIES') && (
+              <div className="sm:hidden mt-3 space-y-2">
+                {/* Game row (INGAME only) */}
+                {activeCategory === 'INGAME CURRENCIES' && (
+                  <div className="flex gap-1.5 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none' }}>
+                    {INGAME_SUBCATEGORIES.map(sub => (
+                      <button key={sub} onClick={() => { setIngameSubcat(sub); setIngameType('All'); }}
+                        className={`flex-none px-3 py-1.5 rounded-xl text-[11px] font-semibold border transition-all ${ingameSubcat === sub ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40' : 'bg-white/[0.03] text-white/40 border-white/[0.07]'}`}
+                      >{sub}</button>
+                    ))}
+                  </div>
+                )}
+                {/* Type row */}
+                <div className="flex gap-1.5 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none' }}>
+                  {(activeCategory === 'LIMITEDS' ? LIMITED_SUBCATEGORIES : INGAME_TYPES).map(sub => {
+                    const active = activeCategory === 'LIMITEDS' ? limitedSubcat === sub : ingameType === sub;
+                    return (
+                      <button key={sub} onClick={() => activeCategory === 'LIMITEDS' ? setLimitedSubcat(sub) : setIngameType(sub)}
+                        className={`flex-none px-3 py-1.5 rounded-xl text-[11px] font-semibold border transition-all ${active ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40' : 'bg-white/[0.03] text-white/40 border-white/[0.07]'}`}
+                      >{sub}</button>
+                    );
+                  })}
+                </div>
+                {/* Sort + stock row */}
+                <div className="flex gap-2">
+                  <select value={sortBy} onChange={e => setSortBy(e.target.value as SortOption)}
+                    className="flex-1 bg-zinc-900/70 border border-white/[0.07] rounded-xl px-3 py-2 text-white/50 text-[11px] outline-none appearance-none"
+                  >
+                    <option value="default">Featured</option>
+                    <option value="price-asc">Price: Low → High</option>
+                    <option value="price-desc">Price: High → Low</option>
+                    <option value="name-asc">Name A → Z</option>
+                  </select>
+                  <button onClick={() => setInStockOnly(v => !v)}
+                    className={`flex-none px-3 py-2 rounded-xl text-[11px] font-semibold border transition-all ${inStockOnly ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40' : 'bg-white/[0.03] text-white/40 border-white/[0.07]'}`}
+                  >In Stock</button>
+                </div>
+              </div>
+            )}
+
             {/* Layout: sidebar + content */}
             <div className="flex gap-4 mt-4">
 
-              {/* Left sidebar — subcategories + filters */}
+              {/* Left sidebar — subcategories + filters — DESKTOP ONLY */}
               <AnimatePresence>
                 {(activeCategory === 'LIMITEDS' || activeCategory === 'INGAME CURRENCIES') && (
                   <motion.aside
@@ -485,7 +526,7 @@ function AppContent() {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -12 }}
                     transition={{ duration: 0.22 }}
-                    className="flex-none w-36 sm:w-44"
+                    className="hidden sm:flex flex-none w-44"
                   >
                     <div className="bg-zinc-900/50 border border-white/[0.07] rounded-2xl p-2 sticky top-24 space-y-1">
 
