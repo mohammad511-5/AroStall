@@ -106,7 +106,16 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLang] = useState<Lang>('en');
+  const [lang, setLangState] = useState<Lang>(() => {
+    const saved = localStorage.getItem('aro_lang');
+    return (saved === 'en' || saved === 'bn') ? saved : 'en';
+  });
+
+  const setLang = (l: Lang) => {
+    setLangState(l);
+    localStorage.setItem('aro_lang', l);
+  };
+
   return (
     <LanguageContext.Provider value={{ lang, setLang, t: translations[lang] }}>
       {children}

@@ -34,6 +34,7 @@ export function Header({
   const { lang, setLang, t } = useLang();
   const { currency, setCurrency } = useCurrency();
   const [clickCount, setClickCount] = useState(0);
+  const clickResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const currencyRef = useRef<HTMLDivElement>(null);
 
@@ -60,8 +61,9 @@ export function Header({
     if (!isAdmin) return;
     const next = clickCount + 1;
     setClickCount(next);
-    if (next >= 3) { onAdminOpen?.(); setClickCount(0); }
-    setTimeout(() => setClickCount(0), 1500);
+    if (next >= 3) { onAdminOpen?.(); setClickCount(0); if (clickResetRef.current) clearTimeout(clickResetRef.current); return; }
+    if (clickResetRef.current) clearTimeout(clickResetRef.current);
+    clickResetRef.current = setTimeout(() => setClickCount(0), 1500);
   };
 
   return (

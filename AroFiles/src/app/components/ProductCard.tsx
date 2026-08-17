@@ -52,7 +52,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
         )}
 
         {/* Low stock warning (for items without stockLabel) */}
-        {product.stock && product.stock < 10 && !product.stockLabel && (
+        {product.stock != null && product.stock < 10 && !product.stockLabel && (
           <div className="absolute top-3 right-3 bg-black/60 text-yellow-400 text-xs px-2 py-1 rounded-full font-medium border border-yellow-500/30 flex items-center gap-1" style={{ backdropFilter: 'blur(6px)' }}>
             <Package className="w-3 h-3" />
             {product.stock} left

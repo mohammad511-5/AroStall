@@ -77,6 +77,7 @@ export function ChatWidget({ isCartOpen }: { isCartOpen?: boolean }) {
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `session_id=eq.${sessionId}` }, payload => {
         const m = payload.new as any;
         setMessages(prev => [...prev, { id: m.id, content: m.content, sender: m.sender, created_at: m.created_at }]);
+        if (m.sender === 'admin' && !open) setUnread(n => n + 1);
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
@@ -84,7 +85,7 @@ export function ChatWidget({ isCartOpen }: { isCartOpen?: boolean }) {
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
   useEffect(() => { if (open) setUnread(0); }, [open]);
-  useEffect(() => { if (isCartOpen && open) handleClose(); }, [isCartOpen]);
+  useEffect(() => { if (isCartOpen && open) handleClose(); }, [isCartOpen, open]);
 
   async function fetchMessages() {
     const { data } = await supabase.from('messages').select('id,content,sender,created_at')

@@ -31,13 +31,13 @@ function OtpInput({ value, onChange }: { value: string; onChange: (v: string) =>
     next[i] = d;
     const joined = next.join('').replace(/ /g, '');
     onChange(joined);
-    if (d && i < 5) setTimeout(() => inputs.current[i + 1]?.focus(), 0);
+    if (d && i < 7) setTimeout(() => inputs.current[i + 1]?.focus(), 0);
   };
 
   const handlePaste = (e: React.ClipboardEvent) => {
     const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 8);
     onChange(pasted);
-    const last = Math.min(pasted.length, 5);
+    const last = Math.min(pasted.length, 7);
     setTimeout(() => inputs.current[last]?.focus(), 0);
     e.preventDefault();
   };
@@ -309,7 +309,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                           <div className="w-14 h-14 bg-yellow-500/10 border border-yellow-500/30 rounded-full flex items-center justify-center mx-auto mb-3">
                             <ShieldCheck className="w-7 h-7 text-yellow-400" />
                           </div>
-                          <p className="text-white/50 text-sm">We sent a 8-digit code to</p>
+                          <p className="text-white/50 text-sm">We sent an 8-digit code to</p>
                           <p className="text-yellow-400 font-semibold">{email}</p>
                         </div>
                         <OtpInput value={otp} onChange={setOtp} />
@@ -329,7 +329,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     {/* ── FORGOT — ENTER EMAIL ── */}
                     {screen === 'forgot-email' && (
                       <form onSubmit={handleForgotSend} className="space-y-4">
-                        <p className="text-white/50 text-sm pb-1">Enter your email and we'll send you a 8-digit reset code.</p>
+                        <p className="text-white/50 text-sm pb-1">Enter your email and we'll send you an 8-digit reset code.</p>
                         <div className="relative">
                           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-yellow-500/60" />
                           <input type="email" value={email} onChange={e => setEmail(e.target.value)}

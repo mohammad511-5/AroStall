@@ -56,7 +56,7 @@ export function Cart({ isOpen, onClose, items, onUpdateQuantity, onRemoveItem, t
   const [robloxUser, setRobloxUser] = useState('');
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
-  const [orderId] = useState(() => generateOrderId());
+  const [orderId, setOrderId] = useState(() => generateOrderId());
   const [showUsernameConfirm, setShowUsernameConfirm] = useState(false);
   const [check1, setCheck1] = useState(false);
   const [check2, setCheck2] = useState(false);
@@ -67,7 +67,7 @@ export function Cart({ isOpen, onClose, items, onUpdateQuantity, onRemoveItem, t
   const hasHighRobux = items.some(i => i.category === 'ROBUX' && Number(i.name.replace(/,/g, '').split(' ')[0]) > 500);
   const hasLimiteds = items.some(i => i.category === 'LIMITEDS');
 
-  const paymentNumber = method === 'bkash' ? settings.bkash_number : settings.bkash_number;
+  const paymentNumber = method === 'nagad' ? (settings.nagad_number ?? settings.bkash_number) : settings.bkash_number;
   const selectedWallet = CRYPTO_WALLETS.find(w => w.id === cryptoWallet);
   const totalUsd = currency === 'USD'
     ? items.reduce((sum, item) => sum + ((item.priceUsd ?? item.price / 116) * item.quantity), 0)
@@ -79,6 +79,7 @@ export function Cart({ isOpen, onClose, items, onUpdateQuantity, onRemoveItem, t
       setStep('cart'); setMethod(null); setCryptoWallet(null); setCopied(false);
       setTxId(''); setPhone(''); setRobloxUser(''); setError('');
       setCheck1(false); setCheck2(false); setCheck3(false);
+      setOrderId(generateOrderId());
     }, 400);
   };
 
@@ -343,7 +344,7 @@ export function Cart({ isOpen, onClose, items, onUpdateQuantity, onRemoveItem, t
                             <div className="w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg bg-orange-500 text-white">N</div>
                             <div className="text-left">
                               <p className="text-white font-bold">Nagad</p>
-                              <p className="text-white/40 text-xs">{nagadEnabled ? `Send to: ${settings.bkash_number}` : 'Coming soon'}</p>
+                              <p className="text-white/40 text-xs">{nagadEnabled ? `Send to: ${settings.nagad_number ?? settings.bkash_number}` : 'Coming soon'}</p>
                             </div>
                             {nagadEnabled && <div className="ml-auto text-yellow-400/50">→</div>}
                           </motion.button>
@@ -447,7 +448,13 @@ export function Cart({ isOpen, onClose, items, onUpdateQuantity, onRemoveItem, t
 
                     <motion.button
                       whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-                      onClick={() => { if (!robloxUser.trim()) { setError('Roblox username is required'); return; } setShowUsernameConfirm(true); }}
+                      onClick={() => {
+                        if (!txId.trim()) { setError('Transaction ID is required'); return; }
+                        if (!phone.trim()) { setError('Phone/contact is required'); return; }
+                        if (!robloxUser.trim()) { setError('Roblox username is required'); return; }
+                        setError('');
+                        setShowUsernameConfirm(true);
+                      }}
                       disabled={sending}
                       className="w-full bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-300 hover:to-yellow-500 text-black font-black py-4 rounded-xl transition-all shadow-xl shadow-yellow-500/30 disabled:opacity-50 disabled:cursor-not-allowed text-sm tracking-wide uppercase"
                     >

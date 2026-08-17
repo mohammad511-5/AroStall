@@ -8,6 +8,7 @@ interface ProductGridProps {
   products: Product[];
   onAddToCart: (product: Product) => void;
   searchQuery?: string;
+  hasFilters?: boolean;
 }
 
 const container = {
@@ -20,7 +21,7 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.35, type: 'spring', stiffness: 130, damping: 18 } },
 };
 
-export function ProductGrid({ products, onAddToCart, searchQuery }: ProductGridProps) {
+export function ProductGrid({ products, onAddToCart, searchQuery, hasFilters }: ProductGridProps) {
   const { t } = useLang();
 
   if (products.length === 0 && searchQuery) {
@@ -40,6 +41,21 @@ export function ProductGrid({ products, onAddToCart, searchQuery }: ProductGridP
   }
 
   if (products.length === 0) {
+    if (hasFilters) {
+      return (
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col items-center justify-center py-28 text-center"
+        >
+          <div className="w-16 h-16 rounded-2xl bg-white/[0.04] border border-white/[0.07] flex items-center justify-center mb-5">
+            <SearchX className="w-7 h-7 text-white/25" />
+          </div>
+          <p className="text-white/50 font-semibold text-base mb-1.5">No products match your filters</p>
+          <p className="text-white/25 text-sm">Try removing a filter or changing your selection</p>
+        </motion.div>
+      );
+    }
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -79,7 +95,7 @@ export function ProductGrid({ products, onAddToCart, searchQuery }: ProductGridP
       variants={container}
       initial="hidden"
       animate="show"
-      className="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 sm:gap-5"
+      className="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-5"
     >
       {products.map((product) => (
         <motion.div key={product.id} variants={item}>

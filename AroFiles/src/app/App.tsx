@@ -131,7 +131,7 @@ function AppContent() {
     setMeta('twitter:image', ogImg, 'name');
   }, []);
 
-  const filteredProducts = (() => {
+  const filteredProducts = useMemo(() => {
     let list = products.filter(p => {
       if (p.category !== activeCategory) return false;
       if (searchQuery) {
@@ -142,7 +142,7 @@ function AppContent() {
       if (activeCategory === 'INGAME CURRENCIES' && ingameSubcat !== 'All' && p.subcategory !== ingameSubcat) return false;
       if (activeCategory === 'INGAME CURRENCIES' && ingameType !== 'All' && p.productType !== ingameType) return false;
       if (inStockOnly) {
-        const hasStock = p.stock !== undefined ? p.stock > 0 : !p.stockLabel?.toLowerCase().includes('out');
+        const hasStock = p.stock != null ? p.stock > 0 : !p.stockLabel?.toLowerCase().includes('out');
         if (!hasStock) return false;
       }
       return true;
@@ -151,7 +151,7 @@ function AppContent() {
     else if (sortBy === 'price-desc') list = [...list].sort((a, b) => b.price - a.price);
     else if (sortBy === 'name-asc') list = [...list].sort((a, b) => a.name.localeCompare(b.name));
     return list;
-  })();
+  }, [products, activeCategory, searchQuery, limitedSubcat, ingameSubcat, ingameType, sortBy, inStockOnly]);
 
   const addToCart = (product: Product) => {
     setCartItems(prev => {
@@ -474,26 +474,29 @@ function AppContent() {
                 ] as const).map((cat, i) => {
                   const CatIcon = cat.icon;
                   return (
-                  <motion.button
+                  <motion.div
                     key={cat.id}
                     initial={{ opacity: 0, y: 28 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.75 + i * 0.09, duration: 0.55, type: 'spring', stiffness: 110 }}
-                    whileHover={{ y: -5, scale: 1.025 }}
-                    whileTap={{ scale: 0.965 }}
+                  >
+                  <motion.button
+                    whileHover={{ y: -6, scale: 1.03 }}
+                    whileTap={{ scale: 0.96 }}
+                    transition={{ type: 'spring', stiffness: 380, damping: 22 }}
                     onClick={() => { setShowShop(true); handleCategoryChange(cat.id); }}
-                    className={`group relative bg-gradient-to-br ${cat.gradient} border ${cat.border} rounded-2xl p-4 sm:p-6 text-left flex flex-col gap-3 sm:gap-4 overflow-hidden shadow-xl ${cat.glow} hover:shadow-2xl transition-all duration-300`}
+                    className={`group relative bg-gradient-to-br ${cat.gradient} border ${cat.border} rounded-2xl p-4 sm:p-6 text-left flex flex-col gap-3 sm:gap-4 overflow-hidden shadow-xl w-full`}
                     style={{ minHeight: '160px' }}
                   >
                     {/* ── Floating background orbs ── */}
-                    <div className={`absolute -top-8 -right-8 w-28 h-28 ${cat.orb1} rounded-full blur-3xl group-hover:scale-125 transition-transform duration-700`} />
-                    <div className={`absolute -bottom-6 -left-6 w-20 h-20 ${cat.orb2} rounded-full blur-2xl group-hover:scale-110 transition-transform duration-700 delay-75`} />
-                    <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 ${cat.orb3} rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                    <div className={`absolute -top-8 -right-8 w-28 h-28 ${cat.orb1} rounded-full blur-3xl group-hover:scale-125 transition-transform duration-200`} />
+                    <div className={`absolute -bottom-6 -left-6 w-20 h-20 ${cat.orb2} rounded-full blur-2xl group-hover:scale-110 transition-transform duration-200`} />
+                    <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 ${cat.orb3} rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-150`} />
 
                     {/* ── Shimmer sweep on hover ── */}
                     <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
                       <div
-                        className="absolute top-0 bottom-0 w-[40%] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                        className="absolute top-0 bottom-0 w-[40%] opacity-0 group-hover:opacity-100 transition-opacity duration-150"
                         style={{
                           background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.055), transparent)',
                           animation: 'bento-shimmer 1.6s ease-in-out infinite',
@@ -502,7 +505,7 @@ function AppContent() {
                     </div>
 
                     {/* ── Subtle dot grid ── */}
-                    <div className="absolute inset-0 pointer-events-none opacity-[0.03] group-hover:opacity-[0.06] transition-opacity duration-500" style={{
+                    <div className="absolute inset-0 pointer-events-none opacity-[0.03] group-hover:opacity-[0.06] transition-opacity duration-150" style={{
                       backgroundImage: `radial-gradient(circle, ${cat.glowHex} 1px, transparent 1px)`,
                       backgroundSize: '20px 20px',
                     }} />
@@ -567,14 +570,10 @@ function AppContent() {
 
                     <div className={`relative flex items-center gap-1 text-xs font-bold ${cat.iconColor} group-hover:gap-2.5 transition-all duration-200`}>
                       <span>Shop now</span>
-                      <motion.span
-                        animate={{ x: [0, 3, 0] }}
-                        transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
-                      >
-                        <ArrowRight className="w-3 h-3" />
-                      </motion.span>
+                      <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform duration-200" />
                     </div>
                   </motion.button>
+                  </motion.div>
                   );
                 })}
               </div>
@@ -814,7 +813,7 @@ function AppContent() {
 
                 <AnimatePresence mode="wait">
                   <motion.div
-                    key={activeCategory + limitedSubcat + ingameSubcat + ingameType + sortBy + inStockOnly}
+                    key={activeCategory}
                     initial={{ opacity: 0, y: 14 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }}
@@ -827,6 +826,7 @@ function AppContent() {
                         products={filteredProducts}
                         onAddToCart={addToCart}
                         searchQuery={searchQuery}
+                        hasFilters={!!(searchQuery || limitedSubcat !== 'All' || ingameSubcat !== 'All' || ingameType !== 'All' || inStockOnly)}
                       />
                     )}
                   </motion.div>

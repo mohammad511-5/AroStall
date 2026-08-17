@@ -11,6 +11,7 @@ export interface SiteSettings {
   announcement_enabled: string;
   announcement_text: string;
   nagad_enabled: string;
+  nagad_number: string;
   wallet_usdt_bep20: string;
   wallet_usdt_erc20: string;
   wallet_usdt_trc20: string;
@@ -32,6 +33,7 @@ export const SETTING_DEFAULTS: SiteSettings = {
   announcement_enabled: 'false',
   announcement_text: '',
   nagad_enabled: 'false',
+  nagad_number: '01XXXXXXXXX',
   wallet_usdt_bep20: '0x8c99c1ab0e9a6a99b0b2815fa4832d8e3d2af58f',
   wallet_usdt_erc20: '0x8c99c1ab0e9a6a99b0b2815fa4832d8e3d2af58f',
   wallet_usdt_trc20: 'TMmDbHQyYgE71uwavadabUnJ23fqWVeZYq',

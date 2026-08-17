@@ -196,7 +196,7 @@ export function UserDashboard({ isOpen, onClose }: UserDashboardProps) {
                       {order.items.map((item, i) => (
                         <div key={i} className="flex items-center justify-between text-sm">
                           <span className="text-white/60">{item.name} ×{item.quantity}</span>
-                          <span className="text-white/80 font-medium">৳{(item.price * item.quantity).toLocaleString()}</span>
+                          <span className="text-white/80 font-medium">{order.paymentMethod === 'bkash' || order.paymentMethod === 'nagad' ? '৳' : '$'}{(item.price * item.quantity).toLocaleString()}</span>
                         </div>
                       ))}
                     </div>
@@ -205,9 +205,9 @@ export function UserDashboard({ isOpen, onClose }: UserDashboardProps) {
                     <div className="pt-3 border-t border-white/10 flex items-center justify-between">
                       <div className="flex items-center gap-2 text-xs text-white/30">
                         <Truck className="w-3.5 h-3.5" />
-                        {order.paymentMethod === 'bkash' ? 'bKash' : 'Nagad'} • {order.robloxUser}
+                        {order.paymentMethod === 'bkash' ? 'bKash' : order.paymentMethod === 'nagad' ? 'Nagad' : order.paymentMethod} • {order.robloxUser}
                       </div>
-                      <span className="text-yellow-400 font-bold">৳{order.total.toLocaleString()}</span>
+                      <span className="text-yellow-400 font-bold">{order.paymentMethod === 'bkash' || order.paymentMethod === 'nagad' ? '৳' : '$'}{order.total.toLocaleString()}</span>
                     </div>
 
                     {order.status === 'delivered' && order.deliveredAt && (

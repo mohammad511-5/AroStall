@@ -10,7 +10,16 @@ interface CurrencyContextType {
 const CurrencyContext = createContext<CurrencyContextType>({ currency: 'BDT', setCurrency: () => {} });
 
 export function CurrencyProvider({ children }: { children: ReactNode }) {
-  const [currency, setCurrency] = useState<Currency>('BDT');
+  const [currency, setCurrencyState] = useState<Currency>(() => {
+    const saved = localStorage.getItem('aro_currency');
+    return (saved === 'USD' || saved === 'BDT') ? saved : 'BDT';
+  });
+
+  const setCurrency = (c: Currency) => {
+    setCurrencyState(c);
+    localStorage.setItem('aro_currency', c);
+  };
+
   return <CurrencyContext.Provider value={{ currency, setCurrency }}>{children}</CurrencyContext.Provider>;
 }
 
